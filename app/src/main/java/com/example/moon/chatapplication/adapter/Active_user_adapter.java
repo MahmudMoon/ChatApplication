@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.example.moon.chatapplication.R;
 import com.example.moon.chatapplication.models.User;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.squareup.picasso.Picasso;
 
 import org.w3c.dom.Text;
@@ -23,11 +24,13 @@ public class Active_user_adapter extends BaseAdapter {
     ArrayList<User> arrayList;
     TextView tvname;
     CircleImageView circleImageView_user;
+   // ImageLoader imageLoader;
 
     public Active_user_adapter(Context context, ArrayList<User> arrayList) {
         this.context = context;
         this.arrayList = arrayList;
         layoutInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        //imageLoader = ImageLoader.getInstance();
     }
 
 
@@ -53,6 +56,7 @@ public class Active_user_adapter extends BaseAdapter {
         circleImageView_user = (CircleImageView)view.findViewById(R.id.active_user_pro_pic);
 
         tvname.setText(arrayList.get(position).getName());
+        //imageLoader.displayImage(arrayList.get(position).getPhotourl(),circleImageView_user);
         Picasso.get().load(arrayList.get(position).getPhotourl()).into(circleImageView_user);
 
         return view;

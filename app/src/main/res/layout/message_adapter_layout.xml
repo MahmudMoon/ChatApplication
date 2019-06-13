@@ -36,7 +36,6 @@
                 android:layout_below="@+id/tvtime"
                 android:layout_marginLeft="8dp"
                 android:layout_weight="0.8"
-                android:gravity="left"
                 android:text="HELLO, EVERY ONE"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 

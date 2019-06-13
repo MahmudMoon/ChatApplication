@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.example.moon.chatapplication.DBHelper.FireBaseHelper;
 import com.example.moon.chatapplication.R;
 import com.example.moon.chatapplication.models.Message;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -21,10 +22,12 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class Message_adaptre_recycler_view extends RecyclerView.Adapter<Message_adaptre_recycler_view.MyViewHolder> {
 
     ArrayList<Message> messageArrayList;
+    //ImageLoader imageLoader;
 
 
     public Message_adaptre_recycler_view(ArrayList<Message> messageArrayList) {
         this.messageArrayList = messageArrayList;
+
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder{
@@ -41,6 +44,7 @@ public class Message_adaptre_recycler_view extends RecyclerView.Adapter<Message_
             tv_seen = (TextView)view.findViewById(R.id.tvseen);
             circleImageView = (CircleImageView)view.findViewById(R.id.ivsender);
             relativeLayout = (RelativeLayout)view.findViewById(R.id.relative_layout_message_container);
+
         }
     }
 
@@ -59,9 +63,9 @@ public class Message_adaptre_recycler_view extends RecyclerView.Adapter<Message_
         if(messageArrayList.get(position).getUid().equals( FireBaseHelper.getUID())){
             //i am sender
             holder.relativeLayout.setBackgroundColor(Color.TRANSPARENT);
-            holder.tv_msg.setGravity(Gravity.RIGHT);
+            holder.tv_msg.setGravity(Gravity.END);
             holder.tv_msg.setText(message.getUser_msg());
-            holder.tv_time.setGravity(Gravity.RIGHT);
+            holder.tv_time.setGravity(Gravity.END);
             holder.tv_time.setText(message.getTime());
             if(message.getSeen()!=0){
                 holder.tv_seen.setText("seen");
@@ -69,8 +73,12 @@ public class Message_adaptre_recycler_view extends RecyclerView.Adapter<Message_
         }else{
             //i am receiver
             holder.relativeLayout.setBackgroundColor(Color.GREEN);
-            holder.tv_time.setText(message.getTime());
+            holder.tv_msg.setGravity(Gravity.START);
             holder.tv_msg.setText(message.getUser_msg());
+            holder.tv_time.setGravity(Gravity.START);
+            holder.tv_time.setText(message.getTime());
+           // imageLoader = ImageLoader.getInstance();
+           // imageLoader.displayImage(message.getUser_photo_url(),holder.circleImageView);
             Picasso.get().load(message.getUser_photo_url()).into(holder.circleImageView);
 
         }

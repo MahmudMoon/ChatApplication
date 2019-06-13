@@ -38,6 +38,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.nostra13.universalimageloader.core.ImageLoader;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -60,7 +62,7 @@ public class ChatFragment extends Fragment {
     LinearLayout typing_layout;
     RecyclerView typing_view;
     boolean typing = true;
-
+    ImageLoader imageLoader;
     private OnFragmentInteractionListener mListener;
 
     public ChatFragment() {
@@ -72,6 +74,7 @@ public class ChatFragment extends Fragment {
         super.onCreate(savedInstanceState);
         arrayList = new ArrayList<>();
         arrayList_of_message = new ArrayList<>();
+        imageLoader = ImageLoader.getInstance();
 
     }
 

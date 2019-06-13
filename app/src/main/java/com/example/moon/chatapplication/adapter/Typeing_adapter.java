@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 
 import com.example.moon.chatapplication.R;
 import com.example.moon.chatapplication.models.Typing;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -16,9 +17,11 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class Typeing_adapter extends RecyclerView.Adapter<Typeing_adapter.MyViewHolder> {
     public ArrayList<Typing> arrayList;
+    //ImageLoader imageLoader;
 
     public Typeing_adapter(ArrayList<Typing> arrayList) {
         this.arrayList = arrayList;
+
     }
 
     @Override
@@ -31,6 +34,8 @@ public class Typeing_adapter extends RecyclerView.Adapter<Typeing_adapter.MyView
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
         Typing typing_info = arrayList.get(position);
+       // imageLoader = ImageLoader.getInstance();
+       // imageLoader.displayImage(typing_info.getPhotourl(),holder.circleImageView_typing);
         Picasso.get().load(typing_info.getPhotourl()).into(holder.circleImageView_typing);
     }
 
@@ -45,6 +50,7 @@ public class Typeing_adapter extends RecyclerView.Adapter<Typeing_adapter.MyView
         public MyViewHolder(View itemView) {
             super(itemView);
             circleImageView_typing = (CircleImageView)itemView.findViewById(R.id.iv_user);
+
         }
     }
 
