@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">ChatApplication</string>
+    <string name="title_activity_home_page">HomePage</string>
+    <string name="title_Chat">Chat</string>
+    <string name="title_active">Active</string>
+    <string name="title_profile">Profile</string>
+
+
+</resources>
