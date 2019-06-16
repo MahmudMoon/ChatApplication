@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -38,8 +39,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
-import com.nostra13.universalimageloader.core.ImageLoader;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -51,7 +50,6 @@ public class ChatFragment extends Fragment {
     RecyclerView recyclerView_msg;
     EditText et_msg_pad;
     ImageButton ibtn_send;
-    ListView listView;
     public static final String TAG = "MyTag";
     String url;
     ArrayList<Typing> arrayList;
@@ -61,8 +59,9 @@ public class ChatFragment extends Fragment {
     Context context;
     LinearLayout typing_layout;
     RecyclerView typing_view;
+    SwipeRefreshLayout swipeRefreshLayout;
     boolean typing = true;
-    ImageLoader imageLoader;
+    int total_msg ;
     private OnFragmentInteractionListener mListener;
 
     public ChatFragment() {
@@ -74,7 +73,7 @@ public class ChatFragment extends Fragment {
         super.onCreate(savedInstanceState);
         arrayList = new ArrayList<>();
         arrayList_of_message = new ArrayList<>();
-        imageLoader = ImageLoader.getInstance();
+
 
     }
 
@@ -89,6 +88,7 @@ public class ChatFragment extends Fragment {
         et_msg_pad = (EditText)view.findViewById(R.id.etmsgpad);
         typing_layout = (LinearLayout)view.findViewById(R.id.typingrecycler);
         typing_view = (RecyclerView)view.findViewById(R.id.recyclertypeView);
+        swipeRefreshLayout = (SwipeRefreshLayout)view.findViewById(R.id.swiperefresh);
 
         return view;
     }
@@ -104,11 +104,19 @@ public class ChatFragment extends Fragment {
         recyclerView_msg.setLayoutManager(mLayoutManager);
         recyclerView_msg.setItemAnimator(new DefaultItemAnimator());
 
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                onUpdate();
+            }
+        });
+
+
 
         sharedPreferences = getContext().getSharedPreferences(SharedPref_constants.Shared_pref_name,Context.MODE_PRIVATE);
         current_user_image = sharedPreferences.getString(SharedPref_constants.image_url,"");
         current_user_name = sharedPreferences.getString(SharedPref_constants.user_name,"");
-        et_msg_pad.clearFocus();
+        //et_msg_pad.clearFocus();
         FireBaseHelper.getReference(DBConstants.Chat).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -116,6 +124,7 @@ public class ChatFragment extends Fragment {
                 for (DataSnapshot data: dataSnapshot.getChildren()) {
                     Message message = data.getValue(Message.class);
                     if(message.getSeen()==0&&!(message.getUid().equals(FireBaseHelper.getUID()))){
+                        Log.i(TAG, "onDataChange: "+"NEW MSG");
                         FireBaseHelper.getReference(DBConstants.Chat).child(data.getKey()).child(DBConstants.Seen).setValue(1).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
@@ -282,6 +291,45 @@ public class ChatFragment extends Fragment {
 
                 }
             });
+    }
+
+    private void onUpdate() {
+        FireBaseHelper.getReference(DBConstants.Chat).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                arrayList_of_message.clear();
+                for (DataSnapshot data: dataSnapshot.getChildren()) {
+                    Message message = data.getValue(Message.class);
+                    if(message.getSeen()==0&&!(message.getUid().equals(FireBaseHelper.getUID()))){
+                        Log.i(TAG, "onDataChange: "+"NEW MSG");
+                        FireBaseHelper.getReference(DBConstants.Chat).child(data.getKey()).child(DBConstants.Seen).setValue(1).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Log.i(TAG, "onSuccess: "+"SEEN");
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.i(TAG, "onFailure: "+"Faile to seen"+e);
+                            }
+                        });
+                    }
+                    arrayList_of_message.add(message);
+                    Message_adaptre_recycler_view  messge_adapter = new Message_adaptre_recycler_view(arrayList_of_message);
+                    recyclerView_msg.setAdapter(messge_adapter);
+                    recyclerView_msg.scrollToPosition(arrayList_of_message.size()-1);
+
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     @Override

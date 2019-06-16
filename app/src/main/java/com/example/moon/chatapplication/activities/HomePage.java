@@ -147,4 +147,20 @@ public class HomePage extends AppCompatActivity implements Profile.OnFragmentInt
         return super.onKeyUp(keyCode, event);
 
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        FireBaseHelper.getReference(DBConstants.Users).child(FireBaseHelper.getUID()).child(DBConstants.islive).setValue(0).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.i(TAG, "onSuccess: "+"IS Not alive");
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.i(TAG, "onFailure: "+"IS LIVe");
+            }
+        });
+    }
 }

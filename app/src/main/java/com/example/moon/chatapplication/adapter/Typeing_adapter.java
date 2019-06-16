@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 
 import com.example.moon.chatapplication.R;
 import com.example.moon.chatapplication.models.Typing;
-import com.nostra13.universalimageloader.core.ImageLoader;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;

@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,6 +40,7 @@ public class LoginActivity extends AppCompatActivity {
     TextView tv_signUp;
     FirebaseAuth firebaseAuth;
     FirebaseUser currentUser;
+    ProgressBar progressBar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,7 +48,7 @@ public class LoginActivity extends AppCompatActivity {
 
         init_view();
         init_variables();
-        init_functions();
+       // init_functions();
         init_listeners();
     }
 
@@ -55,6 +57,8 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(!TextUtils.isEmpty(et_email.getText().toString()) && !TextUtils.isEmpty(et_pass.getText().toString())){
+                    progressBar.setVisibility(View.VISIBLE);
+                    progressBar.setIndeterminate(true);
                     firebaseAuth.signInWithEmailAndPassword(et_email.getText().toString(),et_pass.getText().toString()).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                         @Override
                         public void onSuccess(AuthResult authResult) {
@@ -64,13 +68,10 @@ public class LoginActivity extends AppCompatActivity {
                                     User current_user = dataSnapshot.getValue(User.class);
                                     String name = current_user.getName();
                                     String image_url = current_user.getPhotourl();
-                                    SharedPreferences sharedPreferences = getSharedPreferences(SharedPref_constants.Shared_pref_name,MODE_PRIVATE);
-                                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                                    editor.putString(SharedPref_constants.user_name,name);
-                                    editor.putString(SharedPref_constants.image_url,image_url);
-                                    boolean commit = editor.commit();
+                                    boolean commit = setValueToSharedPref(name,image_url);
                                     if(commit){
                                         FireBaseHelper.getReference(DBConstants.Users).child(FireBaseHelper.getUID()).child(DBConstants.islive).setValue(1);
+                                        progressBar.setVisibility(View.INVISIBLE);
                                         Intent intent = new Intent(LoginActivity.this,HomePage.class);
                                         startActivity(intent);
                                     }
@@ -80,7 +81,7 @@ public class LoginActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                                    progressBar.setVisibility(View.INVISIBLE);
                                 }
                             });
 
@@ -91,6 +92,7 @@ public class LoginActivity extends AppCompatActivity {
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
+                            progressBar.setVisibility(View.INVISIBLE);
                             Toast.makeText(getApplicationContext(),"User not found or poor internet Connection",Toast.LENGTH_SHORT).show();
                         }
                     });
@@ -119,6 +121,15 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    private boolean setValueToSharedPref(String name, String image_url) {
+        SharedPreferences sharedPreferences = getSharedPreferences(SharedPref_constants.Shared_pref_name,MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(SharedPref_constants.user_name,name);
+        editor.putString(SharedPref_constants.image_url,image_url);
+        boolean commit = editor.commit();
+        return commit;
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -128,12 +139,35 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+      //  init_functions();
+    }
+
     private void init_functions() {
        currentUser = firebaseAuth.getCurrentUser();
        if(currentUser!=null){
-           FireBaseHelper.getReference(DBConstants.Users).child(FireBaseHelper.getUID()).child(DBConstants.islive).setValue(1);
-           Intent intent = new Intent(LoginActivity.this,HomePage.class);
-           startActivity(intent);
+           FireBaseHelper.getReference(DBConstants.Users).child(FireBaseHelper.getUID()).addValueEventListener(new ValueEventListener() {
+               @Override
+               public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                   User user = dataSnapshot.getValue(User.class);
+                   boolean b = setValueToSharedPref(user.getName(), user.getPhotourl());
+                   if(b){
+                       FireBaseHelper.getReference(DBConstants.Users).child(FireBaseHelper.getUID()).child(DBConstants.islive).setValue(1);
+                       Intent intent = new Intent(LoginActivity.this,HomePage.class);
+                       startActivity(intent);
+                   }
+               }
+
+               @Override
+               public void onCancelled(@NonNull DatabaseError databaseError) {
+
+               }
+           });
+
+
        }
 
     }
@@ -147,5 +181,6 @@ public class LoginActivity extends AppCompatActivity {
         et_pass = (TextInputEditText)findViewById(R.id.etpass);
         tv_signUp = (TextView)findViewById(R.id.sign_up);
         btn_login = (Button)findViewById(R.id.btnlogin);
+        progressBar = (ProgressBar)findViewById(R.id.pro_login);
     }
 }

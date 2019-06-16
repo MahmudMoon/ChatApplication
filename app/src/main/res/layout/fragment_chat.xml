@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -14,7 +14,8 @@
     <LinearLayout
         android:id="@+id/typingrecycler"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="0.1"
         android:orientation="vertical"
         android:visibility="invisible"
         android:background="#FACECA"
@@ -36,20 +37,33 @@
 
     </LinearLayout>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/recycler_view_meg"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.7"
-        android:layout_marginTop="8dp"
-        android:scrollbars="vertical"
-        android:stackFromBottom="true"
-        android:transcriptMode="alwaysScroll"
-        android:layout_below="@id/typingrecycler"
-        android:layout_above="@id/sender_container"
-        >
 
-    </android.support.v7.widget.RecyclerView>
+    <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/swiperefresh"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.8"
+       >
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler_view_meg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@id/sender_container"
+            android:layout_below="@id/typingrecycler"
+            android:layout_marginTop="8dp"
+            android:scrollbars="vertical"
+            android:stackFromBottom="true"
+            android:transcriptMode="alwaysScroll">
+
+        </android.support.v7.widget.RecyclerView>
+
+    </android.support.v4.widget.SwipeRefreshLayout>
+
+
+
+
+
 
     <LinearLayout
         android:id="@+id/sender_container"
@@ -73,12 +87,12 @@
             android:layout_width="0dp"
             android:layout_weight="0.1"
             android:layout_height="60dp"
-            android:layout_gravity="start"
+            android:layout_gravity="bottom"
             android:src="@drawable/chat"
             android:scaleType="centerInside"
             android:background="@null"/>
 
     </LinearLayout>
 
-</RelativeLayout>
+</LinearLayout>
 

@@ -1,8 +1,10 @@
 package com.example.moon.chatapplication.activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
@@ -16,12 +18,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.moon.chatapplication.DBHelper.DBConstants;
 import com.example.moon.chatapplication.DBHelper.FireBaseHelper;
 import com.example.moon.chatapplication.R;
 import com.example.moon.chatapplication.models.User;
+import com.example.moon.chatapplication.utils.PathUtils;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -34,14 +38,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-
-import junit.runner.Version;
-
 import java.io.File;
 import java.io.IOException;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import id.zelory.compressor.Compressor;
+import in.mayanknagwanshi.imagepicker.ImageSelectActivity;
 
 public class SignUp extends AppCompatActivity {
 
@@ -57,6 +59,7 @@ public class SignUp extends AppCompatActivity {
     File compressor;
     File file;
     Uri final_path;
+    ProgressBar progressBar_round;
 
 
     @Override
@@ -76,6 +79,7 @@ public class SignUp extends AppCompatActivity {
         et_user_pass_retype = (EditText)findViewById(R.id.etuserpassretype);
         btn_signup = (Button)findViewById(R.id.email_sign_in_button);
         circleImageView = (CircleImageView)findViewById(R.id.profile_image);
+        progressBar_round = (ProgressBar)findViewById(R.id.progress_circular_signup);
 
     }
 
@@ -91,14 +95,11 @@ public class SignUp extends AppCompatActivity {
         circleImageView.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 FLAG_IMAGE_SET = false;
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                if(Build.VERSION.SDK_INT>=22)
-                startActivityForResult(Intent.createChooser(intent,"select profile pic"),IMAGE_FILE_REQUST_CODE);
-                else if(Build.VERSION.SDK_INT==21){
-                    startActivityForResult(intent,IMAGE_FILE_REQUST_CODE);
-                }
+                Intent intent = new Intent(SignUp.this, ImageSelectActivity.class);
+                intent.putExtra(ImageSelectActivity.FLAG_COMPRESS, false);//default is true
+                intent.putExtra(ImageSelectActivity.FLAG_CAMERA, true);//default is true
+                intent.putExtra(ImageSelectActivity.FLAG_GALLERY, true);//default is true
+                startActivityForResult(intent, IMAGE_FILE_REQUST_CODE);
 
             }
         });
@@ -106,13 +107,18 @@ public class SignUp extends AppCompatActivity {
         btn_signup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+
                 if(!TextUtils.isEmpty(et_user_name.getText().toString())
                         && !TextUtils.isEmpty(et_user_email.getText().toString())
                         && !TextUtils.isEmpty(et_user_pass.getText().toString())
                         && !TextUtils.isEmpty(et_user_pass_retype.getText().toString())
                 ){
+                    progressBar_round.setVisibility(View.VISIBLE);
+                    progressBar_round.setIndeterminate(true);
                     if(TextUtils.equals(et_user_pass.getText().toString(),et_user_pass_retype.getText().toString())){
                         if(FLAG_IMAGE_SET) {
+                            FLAG_IMAGE_SET = false;
                             firebaseAuth.createUserWithEmailAndPassword(et_user_email.getText().toString(), et_user_pass.getText().toString()).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                                 @Override
                                 public void onSuccess(AuthResult authResult) {
@@ -141,6 +147,8 @@ public class SignUp extends AppCompatActivity {
                                                     public void onSuccess(Void aVoid) {
                                                         Log.i(TAG, "onSuccess: " + "Successfully Registered a new User");
                                                         Toast.makeText(getApplicationContext(), "Successfully Registered a new User", Toast.LENGTH_SHORT).show();
+                                                        progressBar_round.setVisibility(View.INVISIBLE);
+
                                                         ////////////////MAKE INTENT TO GO TO LOGIN PAGE/////////////////////////////////////////
                                                         Intent intent = new Intent(SignUp.this, LoginActivity.class);
                                                         startActivity(intent);
@@ -149,6 +157,7 @@ public class SignUp extends AppCompatActivity {
                                                 }).addOnFailureListener(new OnFailureListener() {
                                                     @Override
                                                     public void onFailure(@NonNull Exception e) {
+                                                        progressBar_round.setVisibility(View.INVISIBLE);
                                                         Log.i(TAG, "onFailure: " + "Failed to Registered a new User" + e.toString());
                                                         Toast.makeText(getApplicationContext(), "Failed to Registered a new User", Toast.LENGTH_LONG).show();
                                                     }
@@ -156,23 +165,28 @@ public class SignUp extends AppCompatActivity {
 
 
                                             } else {
+                                                progressBar_round.setVisibility(View.INVISIBLE);
                                                 Log.i(TAG, "onComplete: " + "FAILED TO GENERATE DOWNLOAD LINK");
                                             }
                                         }
                                     });
 
-                                }else
-                                        Log.i(TAG, "onSuccess: "+"Final path is null");
+                                }else {
+                                        progressBar_round.setVisibility(View.INVISIBLE);
+                                        Log.i(TAG, "onSuccess: " + "Final path is null");
+                                    }
 
 
                                 }
                             }).addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
+                                    progressBar_round.setVisibility(View.INVISIBLE);
                                     Toast.makeText(getApplicationContext(), "Invalid email or password or poor internet Connection", Toast.LENGTH_SHORT).show();
                                 }
                             });
                         }else{
+                            progressBar_round.setVisibility(View.INVISIBLE);
                             Toast.makeText(getApplicationContext(),"SELECT AN IMAGE",Toast.LENGTH_SHORT).show();
                         }
                     }else{
@@ -185,59 +199,44 @@ public class SignUp extends AppCompatActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        if(requestCode==IMAGE_FILE_REQUST_CODE && resultCode==RESULT_OK){
-            FLAG_IMAGE_SET = true;
-            uri = data.getData();
-
-
-            if(Build.VERSION.SDK_INT==21) {
-                String path = getRealPathFromURI(uri);
-                file = new File(path);
-            }else{
-                ///////////////////////////////////////
-                String path = getRealPathFromURI(uri);
-                Log.i(TAG, "onActivityResult: "+path);
-                file = new File(path);
-                if(file.exists()){
-                    Log.i(TAG, "onActivityResult: "+"File exists");
-                }else{
-                    Log.i(TAG, "onActivityResult: "+"File not exist");
-                }
-                /////////////////////////////////////////////////////
-            }
+        if (requestCode == IMAGE_FILE_REQUST_CODE && resultCode == Activity.RESULT_OK) {
+            String filePath = data.getStringExtra(ImageSelectActivity.RESULT_FILE_PATH);
             try {
-                compressor = new Compressor(this)
-                        .setMaxHeight(200)
-                        .setMaxWidth(200)
-                        .setQuality(40)
-                        .setCompressFormat(Bitmap.CompressFormat.JPEG)
-                        .compressToFile(file);
-                   final_path = Uri.fromFile(compressor);
-
-            } catch (IOException e) {
-                Log.i(TAG, "onActivityResult: "+e.toString());
-                e.printStackTrace();
+                file = new File(filePath);
+            } catch (Exception e) {
+                Log.i(TAG, "onActivityResult: " + e.toString());
             }
-            circleImageView.setImageURI(uri);
+
+            if (file.exists()) {
+                Log.i(TAG, "onActivityResult: " + "FILE EXISTS");
+
+                try {
+                    compressor = new Compressor(this)
+                            .setMaxHeight(100)
+                            .setMaxWidth(100)
+                            .setQuality(30)
+                            .setCompressFormat(Bitmap.CompressFormat.JPEG)
+                            .compressToFile(file);
+                    final_path = Uri.fromFile(compressor);
+                    FLAG_IMAGE_SET = true;
+
+                } catch (IOException e) {
+                    Log.i(TAG, "onActivityResult: " + e.toString());
+                    e.printStackTrace();
+                }
+
+                Log.i(TAG, "onActivityResult: "+"FINAL PATH" + final_path);
+
+                Log.i(TAG, "onActivityResult: "+filePath);
+                Bitmap selectedImage = BitmapFactory.decodeFile(filePath);
+                circleImageView.setImageBitmap(selectedImage);
+            }else{
+                Log.i(TAG, "onActivityResult: "+"File doesn't exist");
+            }
         }
+
     }
 
-
-    public String getRealPathFromURI(Uri uri) {
-        if (uri == null) {
-            return null;
-        }
-        String[] projection = {MediaStore.Images.Media.DATA};
-        Cursor cursor = this.getContentResolver().query(uri, projection, null, null, null);
-        if (cursor != null) {
-            int column_index = cursor
-                    .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
-        }
-        return uri.getPath();
-    }
 }

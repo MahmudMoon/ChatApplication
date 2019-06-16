@@ -9,13 +9,8 @@ import android.widget.TextView;
 
 import com.example.moon.chatapplication.R;
 import com.example.moon.chatapplication.models.User;
-import com.nostra13.universalimageloader.core.ImageLoader;
 import com.squareup.picasso.Picasso;
-
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
-
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class Active_user_adapter extends BaseAdapter {

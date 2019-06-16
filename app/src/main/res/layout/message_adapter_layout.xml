@@ -2,20 +2,22 @@
 
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/card_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:layout_margin="1dp"
+    android:padding="4dp"
     card_view:cardCornerRadius="4dp">
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <RelativeLayout
+        android:id="@+id/relative_layout_message_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="2dp"
-        android:id="@+id/relative_layout_message_container">
+        android:layout_margin="2dp">
 
-        <LinearLayout
+        <android.support.constraint.ConstraintLayout
             android:id="@+id/msg_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -27,28 +29,57 @@
                 civ_border_color="#27f208"
                 civ_border_width="5dp"
                 android:layout_width="40dp"
-                android:layout_height="40dp" />
+                android:layout_height="40dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                card_view:layout_constraintBottom_toBottomOf="parent"
+                card_view:layout_constraintStart_toStartOf="parent"
+                card_view:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/tvmsg"
-                android:layout_width="0dp"
+                android:layout_width="338dp"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/tvtime"
-                android:layout_marginLeft="8dp"
-                android:layout_weight="0.8"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
                 android:text="HELLO, EVERY ONE"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                card_view:layout_constraintBottom_toBottomOf="parent"
+                card_view:layout_constraintEnd_toEndOf="parent"
+                card_view:layout_constraintStart_toEndOf="@+id/ivsender"
+                card_view:layout_constraintTop_toTopOf="parent" />
+
+            <ProgressBar
+                android:id="@+id/progressBar2"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
+                android:visibility="invisible"
+                card_view:layout_constraintBottom_toBottomOf="parent"
+                card_view:layout_constraintEnd_toStartOf="@+id/tvmsg"
+                card_view:layout_constraintStart_toStartOf="parent"
+                card_view:layout_constraintTop_toTopOf="parent" />
 
 
-        </LinearLayout>
+        </android.support.constraint.ConstraintLayout>
 
 
         <TextView
             android:id="@+id/tvtime"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_alignEnd="@+id/tvseen"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="45dp"
+            android:layout_marginLeft="45dp"
+            android:layout_marginEnd="0dp"
+            android:layout_marginBottom="2dp"
             android:text="22/05/17 5.50am"
-            android:layout_margin="2dp"
             android:textAppearance="@style/TextAppearance.AppCompat.Small" />
 
         <TextView
@@ -56,6 +87,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/msg_container"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="0dp"
+            android:layout_marginEnd="0dp"
             android:gravity="right"
             android:text=""
             android:textAppearance="@style/TextAppearance.AppCompat.Small" />
